@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete, HttpException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TennisAnalysisService } from './tennis-analysis.service';
 import { WechatService } from './wechat.service';
@@ -20,11 +20,11 @@ export class TennisAnalysisController {
     private readonly wechatService: WechatService,
     private readonly tennisScoreService: TennisScoreService,
     private readonly cosService: CosService,
-  ) {}
+  ) { }
 
   @Post('analyze-video')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '分析网球视频',
     description: '上传网球视频URL，使用AI分析球员的NTRP技术水平并提供改进建议'
   })
@@ -42,13 +42,13 @@ export class TennisAnalysisController {
     // 获取用户信息
     const userInfo = await this.wechatService.getUserByOpenid(user.openid);
     const userId = userInfo?.id;
-    
+
     return this.tennisAnalysisService.analyzeVideo(analyzeVideoDto.videoUrl, userId);
   }
 
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '微信小程序登录',
     description: '使用微信小程序code进行登录，获取访问令牌'
   })
@@ -66,7 +66,7 @@ export class TennisAnalysisController {
 
   @Post('auth/user-info')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取用户详细信息',
     description: '解密微信用户信息，获取用户详细资料'
   })
@@ -85,7 +85,7 @@ export class TennisAnalysisController {
   @Get('auth/profile')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取当前用户信息',
     description: '通过JWT token获取当前登录用户的信息'
   })
@@ -95,12 +95,12 @@ export class TennisAnalysisController {
     type: UserProfileDto,
   })
   async getProfile(@User() user: any): Promise<any> {
-    console.log('getProfile user',user);
+    console.log('getProfile user', user);
     const userInfo = await this.wechatService.getUserByOpenid(user.openid);
     if (!userInfo) {
-      throw new Error('用户不存在');
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
-    console.log('getProfile userInfo',userInfo);
+    console.log('getProfile userInfo', userInfo);
     return {
       user: userInfo,
       message: '用户信息获取成功'
@@ -109,7 +109,7 @@ export class TennisAnalysisController {
 
   @Post('auth/refresh-token')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '刷新访问令牌',
     description: '使用旧的token刷新获取新的访问令牌'
   })
@@ -131,7 +131,7 @@ export class TennisAnalysisController {
   @Get('scores')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取用户评分记录列表',
     description: '分页获取当前用户的网球评分记录'
   })
@@ -151,7 +151,7 @@ export class TennisAnalysisController {
   @Get('scores/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取评分记录详情',
     description: '获取指定ID的评分记录详细信息'
   })
@@ -171,7 +171,7 @@ export class TennisAnalysisController {
   @Get('scores/stats/summary')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取用户评分统计',
     description: '获取用户的评分统计信息，包括平均分、最高分等'
   })
@@ -192,7 +192,7 @@ export class TennisAnalysisController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '删除评分记录',
     description: '删除指定ID的评分记录'
   })
@@ -212,7 +212,7 @@ export class TennisAnalysisController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取文件上传临时密钥',
     description: '获取腾讯云COS上传临时密钥，用于客户端直传文件'
   })
@@ -250,7 +250,7 @@ export class TennisAnalysisController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '文件上传完成回调',
     description: '客户端上传完成后调用此接口，获取文件访问URL'
   })
@@ -274,7 +274,7 @@ export class TennisAnalysisController {
   @Get('upload/config')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '获取上传配置信息',
     description: '获取文件上传的配置信息，包括支持的文件类型和大小限制'
   })
