@@ -3,12 +3,12 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { TennisScore } from './models/tennis-score.model';
 import { User } from './models/user.model';
-import { 
-  CreateTennisScoreDto, 
-  TennisScoreResponseDto, 
-  QueryTennisScoreDto, 
+import {
+  CreateTennisScoreDto,
+  TennisScoreResponseDto,
+  QueryTennisScoreDto,
   TennisScoreListResponseDto,
-  TennisScoreStatsDto 
+  TennisScoreStatsDto
 } from './dto/tennis-score.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 
@@ -21,14 +21,14 @@ export class TennisScoreService {
     private tennisScoreModel: typeof TennisScore,
     @InjectModel(User)
     private userModel: typeof User,
-  ) {}
+  ) { }
 
   /**
    * 创建评分记录
    */
   async createScore(
-    userId: string, 
-    createDto: CreateTennisScoreDto, 
+    userId: string,
+    createDto: CreateTennisScoreDto,
     analysisResult: TennisAnalysisResponseDto,
     rawResponse?: string
   ): Promise<TennisScoreResponseDto> {
@@ -54,7 +54,7 @@ export class TennisScoreService {
       };
 
       const score = await this.tennisScoreModel.create(scoreData);
-      
+
       this.logger.log(`评分记录创建成功，ID: ${score.id}`);
       return this.formatScoreResponse(score);
 

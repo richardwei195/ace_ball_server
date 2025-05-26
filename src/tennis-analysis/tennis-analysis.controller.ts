@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete, HttpException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TennisAnalysisService } from './tennis-analysis.service';
 import { WechatService } from './wechat.service';
@@ -7,15 +7,17 @@ import { CosService } from './cos.service';
 import { AnalyzeVideoDto } from './dto/analyze-video.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 import { WechatLoginDto, WechatUserInfoDto, WechatAuthResponseDto, UserProfileDto } from './dto/wechat-auth.dto';
-import { CreateTennisScoreDto, TennisScoreResponseDto, QueryTennisScoreDto, TennisScoreListResponseDto, TennisScoreStatsDto } from './dto/tennis-score.dto';
+import { QueryTennisScoreDto, TennisScoreStatsDto } from './dto/tennis-score.dto';
 import { GetUploadTokenDto, CosUploadTokenResponseDto, CosUploadCompleteDto, CosUploadCompleteResponseDto } from './dto/cos-upload.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
 import { RedisService } from '../redis/redis.service';
+import { API_CODE } from 'src/common/constants';
 
 @ApiTags('网球分析')
 @Controller('tennis-analysis')
 export class TennisAnalysisController {
+  private readonly logger = new Logger(TennisAnalysisController.name);
   constructor(
     private readonly tennisAnalysisService: TennisAnalysisService,
     private readonly wechatService: WechatService,
@@ -139,12 +141,12 @@ export class TennisAnalysisController {
     type: UserProfileDto,
   })
   async getProfile(@User() user: any): Promise<any> {
-    console.log('getProfile user', user);
+    this.logger.log('getProfile user', user);
     const userInfo = await this.wechatService.getUserByOpenid(user.openid);
     if (!userInfo) {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
-    console.log('getProfile userInfo', userInfo);
+    this.logger.log('getProfile userInfo', userInfo);
     return {
       user: userInfo,
       message: '用户信息获取成功'
@@ -182,9 +184,9 @@ export class TennisAnalysisController {
   @ApiResponse({
     status: 200,
     description: '获取成功',
-    type: TennisScoreListResponseDto,
+
   })
-  async getUserScores(@User() user: any, @Query() queryDto: QueryTennisScoreDto): Promise<TennisScoreListResponseDto> {
+  async getUserScores(@User() user: any, @Query() queryDto: QueryTennisScoreDto): Promise<any> {
     const userInfo = await this.wechatService.getUserByOpenid(user.openid);
     if (!userInfo) {
       throw new Error('用户不存在');
@@ -202,14 +204,43 @@ export class TennisAnalysisController {
   @ApiResponse({
     status: 200,
     description: '获取成功',
-    type: TennisScoreResponseDto,
   })
-  async getScoreById(@Param('id') id: number, @User() user: any): Promise<TennisScoreResponseDto> {
-    const userInfo = await this.wechatService.getUserByOpenid(user.openid);
-    if (!userInfo) {
-      throw new Error('用户不存在');
+  async getScoreById(
+    @Param('id') id: number,
+    @User() user: any,
+    @Query('userId') userId: string,
+  ): Promise<any> {
+    try {
+      this.logger.log('getScoreById id', id);
+      this.logger.log('getScoreById userId', userId);
+
+      const userInfo = await this.wechatService.getUserByOpenid(user.openid);
+
+      if (!userInfo) {
+        return {
+          code: API_CODE.USER_NOT_FOUND,
+          message: '用户不存在',
+          data: null,
+        };
+      }
+
+      const result = await this.tennisScoreService.getScoreById(id, userId);
+
+      this.logger.log('getScoreById result', result);
+
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getScoreById error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '系统错误',
+        data: null,
+      }
     }
-    return this.tennisScoreService.getScoreById(id, userInfo.id);
   }
 
   @Get('scores/stats/summary')
