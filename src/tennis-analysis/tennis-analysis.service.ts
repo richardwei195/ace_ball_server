@@ -136,7 +136,7 @@ export class TennisAnalysisService {
       // 验证结果格式
       this.validateAnalysisResult(analysisResult);
 
-      this.logger.log(`网球视频分析完成，整体评分: ${analysisResult.overallRating}`);
+      this.logger.log(`网球视频分析完成，整体评分: ${analysisResult.overallRating}, analysisResult: ${JSON.stringify(analysisResult, null, 2)}`);
 
       // 如果提供了用户ID，保存评分记录到数据库
       if (userId) {
