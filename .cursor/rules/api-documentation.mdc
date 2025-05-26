@@ -1,0 +1,19 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# API文档 (Swagger)
+
+本项目使用Swagger自动生成API文档。
+
+## 配置
+- Swagger配置位于[src/main.ts](mdc:src/main.ts)文件中
+- API文档在项目运行时可通过 `/api/docs` 路径访问
+
+## API架构
+- 所有API路由都有 `/api` 前缀
+- API请求和响应使用DTO（数据传输对象）定义
+- 主要API组:
+  - 用户API: `/api/users` - 由[src/users/users.controller.ts](mdc:src/users/users.controller.ts)处理
+  - 任务API: `/api/tasks` - 由[src/tasks/task.controller.ts](mdc:src/tasks/task.controller.ts)处理

@@ -1,0 +1,17 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 任务模块 (Tasks Module)
+
+任务模块处理所有与任务相关的功能，可能包括定时任务、队列任务或用户任务。
+
+## 主要文件
+- 模块定义: [src/tasks/task.module.ts](mdc:src/tasks/task.module.ts)
+- 控制器: [src/tasks/task.controller.ts](mdc:src/tasks/task.controller.ts) - 处理HTTP请求
+- 服务: [src/tasks/task.service.ts](mdc:src/tasks/task.service.ts) - 包含业务逻辑
+
+## 子目录
+- DTO目录: `src/tasks/dto/` - 包含数据传输对象
+- 模型目录: `src/tasks/models/` - 包含数据库模型

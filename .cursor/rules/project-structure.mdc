@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# ace_ball_server - 项目结构
+
+这是一个基于NestJS框架的服务端项目，提供了ace_ball_server应用的后端API服务。
+
+## 主要入口文件
+- 主入口点: [src/main.ts](mdc:src/main.ts) - 启动NestJS应用程序
+- 主模块: [src/app.module.ts](mdc:src/app.module.ts) - 应用的根模块，引入所有其他模块
+
+## 核心模块
+- 数据库模块: [src/database/database.module.ts](mdc:src/database/database.module.ts) - 使用Sequelize连接MySQL数据库
+- 用户模块: [src/users/users.module.ts](mdc:src/users/users.module.ts) - 处理用户相关功能
+- 任务模块: [src/tasks/task.module.ts](mdc:src/tasks/task.module.ts) - 处理任务相关功能
+
+## 项目配置文件
+- [package.json](mdc:package.json) - 项目依赖和脚本配置
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript配置
+- [ecosystem.config.js](mdc:ecosystem.config.js) - PM2配置文件，用于生产环境部署

@@ -1,0 +1,18 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 用户模块 (Users Module)
+
+用户模块处理用户相关的所有功能，包括注册、登录和用户信息管理。
+
+## 主要文件
+- 模块定义: [src/users/users.module.ts](mdc:src/users/users.module.ts)
+- 控制器: [src/users/users.controller.ts](mdc:src/users/users.controller.ts) - 处理HTTP请求
+- 服务: [src/users/users.service.ts](mdc:src/users/users.service.ts) - 包含业务逻辑
+
+## 子目录
+- DTO目录: `src/users/dto/` - 包含数据传输对象
+- 模型目录: `src/users/models/` - 包含数据库模型
+- 服务目录: `src/users/services/` - 包含额外的服务类

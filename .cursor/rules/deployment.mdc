@@ -1,0 +1,25 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 部署与运行指南
+
+本项目支持多种运行和部署方式，包括开发环境和生产环境。
+
+## 脚本
+- 开发环境启动: `yarn start:dev` 或 `npm run start:dev` - 带有热重载功能
+- 生产环境构建: `yarn build` 或 `npm run build`
+- 生产环境启动: `yarn start:prod` 或 `npm run start:prod`
+
+## PM2部署
+项目支持使用PM2进行部署和进程管理:
+- PM2配置文件: [ecosystem.config.js](mdc:ecosystem.config.js)
+- 启动命令:
+  - 生产环境: `yarn pm2:start` 或 `npm run pm2:start`
+  - 开发环境: `yarn pm2:start:dev` 或 `npm run pm2:start:dev`
+  
+## Shell脚本
+项目包含两个启动脚本:
+- [start-dev.sh](mdc:start-dev.sh) - 开发环境启动脚本
+- [start.sh](mdc:start.sh) - 生产环境启动脚本
