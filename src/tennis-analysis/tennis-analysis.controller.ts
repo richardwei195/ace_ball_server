@@ -11,6 +11,7 @@ import { CreateTennisScoreDto, TennisScoreResponseDto, QueryTennisScoreDto, Tenn
 import { GetUploadTokenDto, CosUploadTokenResponseDto, CosUploadCompleteDto, CosUploadCompleteResponseDto } from './dto/cos-upload.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
+import { RedisService } from '../redis/redis.service';
 
 @ApiTags('网球分析')
 @Controller('tennis-analysis')
@@ -20,6 +21,7 @@ export class TennisAnalysisController {
     private readonly wechatService: WechatService,
     private readonly tennisScoreService: TennisScoreService,
     private readonly cosService: CosService,
+    private readonly redisService: RedisService,
   ) { }
 
   @Post('analyze-video')
@@ -44,6 +46,48 @@ export class TennisAnalysisController {
     const userId = userInfo?.id;
 
     return this.tennisAnalysisService.analyzeVideo(analyzeVideoDto.videoUrl, userId);
+  }
+
+  @Get('task-status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '获取用户任务状态',
+    description: '查看当前用户是否有正在进行的分析任务'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    schema: {
+      type: 'object',
+      properties: {
+        hasActiveTask: { type: 'boolean', description: '是否有活跃任务' },
+        taskInfo: {
+          type: 'object',
+          description: '任务信息',
+          properties: {
+            taskId: { type: 'string', description: '任务ID' },
+            startTime: { type: 'string', description: '开始时间' },
+            status: { type: 'string', description: '任务状态' }
+          }
+        }
+      }
+    }
+  })
+  async getTaskStatus(@User() user: any): Promise<any> {
+    const userInfo = await this.wechatService.getUserByOpenid(user.openid);
+    if (!userInfo) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+    }
+
+    const hasActiveTask = await this.redisService.hasActiveTask(userInfo.id.toString());
+    const taskInfo = hasActiveTask ? await this.redisService.getUserTask(userInfo.id.toString()) : null;
+
+    return {
+      hasActiveTask,
+      taskInfo,
+      message: hasActiveTask ? '您有正在进行的分析任务' : '当前没有进行中的任务'
+    };
   }
 
   @Post('auth/login')

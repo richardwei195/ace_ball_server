@@ -149,6 +149,19 @@ deploy_on_server() {
       npm install -g pm2
     fi
     
+    # 检查并安装Redis
+    if ! command -v redis-server &> /dev/null; then
+      echo "正在安装Redis..."
+      sudo apt-get update
+      sudo apt-get install -y redis-server
+      sudo systemctl start redis-server
+      sudo systemctl enable redis-server
+      echo "Redis安装完成"
+    else
+      echo "Redis已安装，检查服务状态..."
+      sudo systemctl start redis-server || true
+    fi
+    
     # 安装生产依赖
     echo "安装生产依赖..."
     yarn install --production

@@ -3,6 +3,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DatabaseModule } from "./database/database.module";
 import { TennisAnalysisModule } from "./tennis-analysis/tennis-analysis.module";
+import { RedisModule } from "./redis/redis.module";
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -12,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
     }),
     DatabaseModule,
+    RedisModule,
     TennisAnalysisModule
   ],
   controllers: [AppController],

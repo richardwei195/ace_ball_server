@@ -1,9 +1,11 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 import { TennisScoreService } from './tennis-score.service';
 import { CreateTennisScoreDto } from './dto/tennis-score.dto';
+import { RedisService } from '../redis/redis.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TennisAnalysisService {
@@ -13,6 +15,7 @@ export class TennisAnalysisService {
   constructor(
     private configService: ConfigService,
     private tennisScoreService: TennisScoreService,
+    private redisService: RedisService,
   ) {
     const apiKey = this.configService.get<string>('DASHSCOPE_API_KEY');
     if (!apiKey) {
@@ -26,8 +29,37 @@ export class TennisAnalysisService {
   }
 
   async analyzeVideo(videoUrl: string, userId?: string): Promise<TennisAnalysisResponseDto> {
+    const taskId = uuidv4();
+    const lockKey = `video_analysis_lock:${videoUrl}`;
+    const lockValue = taskId;
+
     try {
-      this.logger.log(`开始分析网球视频: ${videoUrl}`);
+      this.logger.log(`开始分析网球视频: ${videoUrl}, 任务ID: ${taskId}`);
+
+      // 检查用户是否有正在进行的任务
+      if (userId) {
+        const hasActiveTask = await this.redisService.hasActiveTask(userId);
+        if (hasActiveTask) {
+          const activeTask = await this.redisService.getUserTask(userId);
+          throw new ConflictException(`您有正在进行的分析任务，请等待完成。任务开始时间: ${activeTask?.startTime || '未知'}`);
+        }
+
+        // 设置用户任务状态
+        const taskSet = await this.redisService.setUserTask(userId, taskId, 1800); // 30分钟超时
+        if (!taskSet) {
+          throw new ConflictException('无法创建新的分析任务，请稍后重试');
+        }
+      }
+
+      // 获取分布式锁，防止同一视频被重复分析
+      const lockAcquired = await this.redisService.acquireLock(lockKey, 1800, lockValue); // 30分钟锁
+      if (!lockAcquired) {
+        // 如果获取锁失败，清理用户任务状态
+        if (userId) {
+          await this.redisService.completeUserTask(userId);
+        }
+        throw new ConflictException('该视频正在被分析中，请稍后重试');
+      }
 
       const prompt = `
 请分析这个网球视频，并根据NTRP（National Tennis Rating Program）标准对球员进行评分, 。
@@ -94,7 +126,7 @@ export class TennisAnalysisService {
         // 提取JSON部分（可能包含在代码块中）
         const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
         const jsonString = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
-        
+
         analysisResult = JSON.parse(jsonString.trim());
       } catch (parseError) {
         this.logger.error(`JSON解析失败: ${parseError.message}`);
@@ -105,7 +137,7 @@ export class TennisAnalysisService {
       this.validateAnalysisResult(analysisResult);
 
       this.logger.log(`网球视频分析完成，整体评分: ${analysisResult.overallRating}`);
-      
+
       // 如果提供了用户ID，保存评分记录到数据库
       if (userId) {
         try {
@@ -121,12 +153,32 @@ export class TennisAnalysisService {
           // 不影响主要功能，继续返回分析结果
         }
       }
-      
+
+      // 释放锁和清理任务状态
+      await this.redisService.releaseLock(lockKey, lockValue);
+      if (userId) {
+        await this.redisService.completeUserTask(userId);
+      }
+
+      this.logger.log(`任务完成，已释放锁和清理任务状态，任务ID: ${taskId}`);
+
       return analysisResult;
 
     } catch (error) {
       this.logger.error(`网球视频分析失败: ${error.message}`, error.stack);
-      if (error instanceof BadRequestException) {
+
+      // 确保在出错时也释放锁和清理任务状态
+      try {
+        await this.redisService.releaseLock(lockKey, lockValue);
+        if (userId) {
+          await this.redisService.completeUserTask(userId);
+        }
+        this.logger.log(`错误处理：已释放锁和清理任务状态，任务ID: ${taskId}`);
+      } catch (cleanupError) {
+        this.logger.error(`清理资源失败: ${cleanupError.message}`, cleanupError.stack);
+      }
+
+      if (error instanceof BadRequestException || error instanceof ConflictException) {
         throw error;
       }
       throw new BadRequestException(`视频分析失败: ${error.message}`);

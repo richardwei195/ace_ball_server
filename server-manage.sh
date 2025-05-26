@@ -6,7 +6,7 @@
 SERVER_IP="129.204.155.94"
 SERVER_USER="root"
 SERVER_PATH="/var/www/ace_ball_server"
-PROJECT_NAME="ace_ball_server
+PROJECT_NAME="ace_ball_server"
 
 # 颜色定义
 GREEN='\033[0;32m'
