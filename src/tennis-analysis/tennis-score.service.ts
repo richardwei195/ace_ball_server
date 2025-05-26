@@ -5,9 +5,7 @@ import { TennisScore } from './models/tennis-score.model';
 import { User } from './models/user.model';
 import {
   CreateTennisScoreDto,
-  TennisScoreResponseDto,
   QueryTennisScoreDto,
-  TennisScoreListResponseDto,
   TennisScoreStatsDto
 } from './dto/tennis-score.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
@@ -31,7 +29,7 @@ export class TennisScoreService {
     createDto: CreateTennisScoreDto,
     analysisResult: TennisAnalysisResponseDto,
     rawResponse?: string
-  ): Promise<TennisScoreResponseDto> {
+  ): Promise<any> {
     try {
       this.logger.log(`创建评分记录，用户ID: ${userId}, 视频URL: ${createDto.videoUrl}`);
 
@@ -67,7 +65,7 @@ export class TennisScoreService {
   /**
    * 获取用户评分记录列表
    */
-  async getUserScores(userId: string, queryDto: QueryTennisScoreDto): Promise<TennisScoreListResponseDto> {
+  async getUserScores(userId: string, queryDto: QueryTennisScoreDto): Promise<any> {
     try {
       this.logger.log(`获取用户评分记录，用户ID: ${userId}`);
 
@@ -123,7 +121,7 @@ export class TennisScoreService {
   /**
    * 获取单个评分记录详情
    */
-  async getScoreById(id: number, userId: string): Promise<TennisScoreResponseDto> {
+  async getScoreById(id: number, userId: string): Promise<any> {
     try {
       this.logger.log(`获取评分记录详情，ID: ${id}, 用户ID: ${userId}`);
 
@@ -214,7 +212,7 @@ export class TennisScoreService {
   /**
    * 格式化评分记录响应
    */
-  private formatScoreResponse(score: TennisScore): TennisScoreResponseDto {
+  private formatScoreResponse(score: TennisScore): any {
     return {
       id: score.id,
       userId: score.userId,

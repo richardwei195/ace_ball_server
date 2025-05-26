@@ -164,7 +164,7 @@ deploy_on_server() {
     
     # 安装生产依赖
     echo "安装生产依赖..."
-    yarn install --production
+    yarn
     
     # 创建日志目录
     mkdir -p logs
