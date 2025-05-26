@@ -8,7 +8,7 @@ import { AnalyzeVideoDto } from './dto/analyze-video.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 import { WechatLoginDto, WechatUserInfoDto, WechatAuthResponseDto, UserProfileDto } from './dto/wechat-auth.dto';
 import { QueryTennisScoreDto, TennisScoreStatsDto } from './dto/tennis-score.dto';
-import { GetUploadTokenDto, CosUploadTokenResponseDto, CosUploadCompleteDto, CosUploadCompleteResponseDto } from './dto/cos-upload.dto';
+import { GetUploadTokenDto, CosUploadTokenResponseDto } from './dto/cos-upload.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
 import { RedisService } from '../redis/redis.service';
@@ -275,12 +275,31 @@ export class TennisAnalysisController {
     status: 204,
     description: '删除成功',
   })
-  async deleteScore(@Param('id') id: number, @User() user: any): Promise<void> {
-    const userInfo = await this.wechatService.getUserByOpenid(user.openid);
-    if (!userInfo) {
-      throw new Error('用户不存在');
+  async deleteScore(@Param('id') id: number, @User() user: any): Promise<any> {
+    try {
+      this.logger.log('deleteScore id', id);
+      this.logger.log('deleteScore user', user);
+
+      const userInfo = await this.wechatService.getUserByOpenid(user.openid);
+      if (!userInfo) {
+        throw new Error('用户不存在');
+      }
+      await this.tennisScoreService.deleteScore(id, userInfo.id);
+
+      this.logger.log('id: ' + id + ' deleteScore success');
+      return {
+        code: API_CODE.SUCCESS,
+        message: '删除成功',
+        data: null,
+      }
+    } catch (error) {
+      this.logger.error('deleteScore error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '系统错误',
+        data: null,
+      }
     }
-    return this.tennisScoreService.deleteScore(id, userInfo.id);
   }
 
   @Post('upload/token')
@@ -305,11 +324,6 @@ export class TennisAnalysisController {
       throw new Error('用户不存在');
     }
 
-    // 验证文件类型和扩展名
-    if (uploadDto.fileExtension && !this.cosService.validateFileType(uploadDto.fileType, uploadDto.fileExtension)) {
-      throw new Error(`不支持的文件类型: ${uploadDto.fileExtension}`);
-    }
-
     // 验证文件大小
     if (uploadDto.fileSize) {
       const sizeLimit = this.cosService.getFileSizeLimit(uploadDto.fileType);
@@ -319,79 +333,5 @@ export class TennisAnalysisController {
     }
 
     return this.cosService.getUploadToken(userInfo.id, uploadDto);
-  }
-
-  @Post('upload/complete')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: '文件上传完成回调',
-    description: '客户端上传完成后调用此接口，获取文件访问URL'
-  })
-  @ApiResponse({
-    status: 200,
-    description: '处理成功',
-    type: CosUploadCompleteResponseDto,
-  })
-  @ApiBadRequestResponse({
-    description: '处理失败',
-  })
-  async uploadComplete(@User() user: any, @Body() completeDto: CosUploadCompleteDto): Promise<CosUploadCompleteResponseDto> {
-    const userInfo = await this.wechatService.getUserByOpenid(user.openid);
-    if (!userInfo) {
-      throw new Error('用户不存在');
-    }
-
-    return this.cosService.uploadComplete(userInfo.id, completeDto);
-  }
-
-  @Get('upload/config')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '获取上传配置信息',
-    description: '获取文件上传的配置信息，包括支持的文件类型和大小限制'
-  })
-  @ApiResponse({
-    status: 200,
-    description: '获取成功',
-    schema: {
-      type: 'object',
-      properties: {
-        supportedTypes: {
-          type: 'object',
-          description: '支持的文件类型',
-          example: {
-            video: ['mp4', 'avi', 'mov'],
-            image: ['jpg', 'png', 'gif'],
-            document: ['pdf', 'doc', 'txt']
-          }
-        },
-        sizeLimits: {
-          type: 'object',
-          description: '文件大小限制（字节）',
-          example: {
-            video: 524288000,
-            image: 10485760,
-            document: 52428800
-          }
-        }
-      }
-    }
-  })
-  async getUploadConfig(): Promise<any> {
-    return {
-      supportedTypes: {
-        video: ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v'],
-        image: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'],
-        document: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
-      },
-      sizeLimits: {
-        video: this.cosService.getFileSizeLimit('video'),
-        image: this.cosService.getFileSizeLimit('image'),
-        document: this.cosService.getFileSizeLimit('document'),
-      },
-    };
   }
 } 

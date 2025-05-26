@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 import { TennisScoreService } from './tennis-score.service';
-import { CreateTennisScoreDto } from './dto/tennis-score.dto';
 import { RedisService } from '../redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 
