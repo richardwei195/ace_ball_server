@@ -2,11 +2,9 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as STS from 'qcloud-cos-sts';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  GetUploadTokenDto, 
-  CosUploadTokenResponseDto, 
-  CosUploadCompleteDto, 
-  CosUploadCompleteResponseDto 
+import {
+  GetUploadTokenDto,
+  CosUploadTokenResponseDto,
 } from './dto/cos-upload.dto';
 
 @Injectable()
@@ -41,7 +39,7 @@ export class CosService {
 
       // 生成上传路径前缀
       const prefix = this.generateUploadPrefix(userId, uploadDto.fileType);
-      
+
       // 配置临时密钥策略
       const policy = this.generateUploadPolicy(prefix, uploadDto);
 
@@ -74,7 +72,7 @@ export class CosService {
   /**
    * 上传完成回调
    */
-  async uploadComplete(userId: string, completeDto: CosUploadCompleteDto): Promise<CosUploadCompleteResponseDto> {
+  async uploadComplete(userId: string, completeDto: any): Promise<any> {
     try {
       this.logger.log(`文件上传完成，用户ID: ${userId}, 文件Key: ${completeDto.fileKey}`);
 
@@ -87,7 +85,7 @@ export class CosService {
       // 生成文件访问URL
       const fileUrl = this.generateFileUrl(completeDto.fileKey);
 
-      const response: CosUploadCompleteResponseDto = {
+      const response: any = {
         fileUrl,
         fileKey: completeDto.fileKey,
         fileType: completeDto.fileType,
@@ -116,7 +114,7 @@ export class CosService {
    * 生成上传策略
    */
   private generateUploadPolicy(prefix: string, uploadDto: GetUploadTokenDto): any {
-    var shortBucketName = this.bucket.substr(0 , this.bucket.lastIndexOf('-'));
+    var shortBucketName = this.bucket.substr(0, this.bucket.lastIndexOf('-'));
     var appId = this.bucket.substr(1 + this.bucket.lastIndexOf('-'));
 
     const allowActions = [
@@ -137,7 +135,7 @@ export class CosService {
           principal: { qcs: ['*'] },
           action: allowActions,
           resource: [
-                'qcs::cos:' + this.region + ':uid/' + appId + ':prefix//' + appId + '/' + shortBucketName + '/' + this.allowPrefix,
+            'qcs::cos:' + this.region + ':uid/' + appId + ':prefix//' + appId + '/' + shortBucketName + '/' + this.allowPrefix,
           ],
           condition: {},
         },
@@ -202,7 +200,7 @@ export class CosService {
     const uuid = uuidv4();
     const ext = fileExtension || this.getFileExtension(originalName);
     const timestamp = Date.now();
-    
+
     return `${timestamp}-${uuid}.${ext}`;
   }
 

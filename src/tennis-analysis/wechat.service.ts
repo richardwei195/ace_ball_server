@@ -61,12 +61,12 @@ export class WechatService {
 
       // 调用微信接口获取session
       const session = await this.getWechatSession(loginDto.code);
-      
+
       if (session.errcode) {
         throw new BadRequestException(`微信登录失败: ${session.errmsg}`);
       }
 
-      console.log('login session',session);
+      console.log('login session', session);
 
       // 生成JWT token
       const payload = {
@@ -74,7 +74,7 @@ export class WechatService {
         unionid: session.unionid,
         sessionKey: session.session_key,
       };
-      
+
       const accessToken = this.jwtService.sign(payload, {
         expiresIn: '7d', // 7天过期
       });
@@ -82,7 +82,7 @@ export class WechatService {
       // 保存或更新用户信息到数据库
       const user = await this.saveOrUpdateUser(session, loginDto);
 
-      console.log('login user',user);
+      console.log('login user', user);
 
       const response: WechatAuthResponseDto = {
         openid: session.openid,
@@ -114,7 +114,7 @@ export class WechatService {
 
       // 先获取session_key
       const session = await this.getWechatSession(userInfoDto.code);
-      
+
       if (session.errcode) {
         throw new BadRequestException(`获取session失败: ${session.errmsg}`);
       }
@@ -181,14 +181,14 @@ export class WechatService {
   async refreshToken(oldToken: string): Promise<string> {
     try {
       const payload = this.jwtService.verify(oldToken);
-      
+
       // 生成新的token
       const newPayload = {
         openid: payload.openid,
         unionid: payload.unionid,
         sessionKey: payload.sessionKey,
       };
-      
+
       return this.jwtService.sign(newPayload, {
         expiresIn: '7d',
       });
@@ -247,7 +247,7 @@ export class WechatService {
     const sortedKeys = Object.keys(data).sort();
     const stringA = sortedKeys.map(key => `${key}=${data[key]}`).join('&');
     const stringSignTemp = `${stringA}&key=${sessionKey}`;
-    
+
     return crypto.createHash('md5').update(stringSignTemp).digest('hex').toUpperCase();
   }
 
@@ -311,7 +311,7 @@ export class WechatService {
           unionid: userInfo.unionId,
           sessionKey: session.session_key,
           name: userInfo.nickName,
-          avatar: userInfo.avatarUrl,
+          avatar: userInfo.avatarUrl || 'https://tennis-1251306435.cos.ap-nanjing.myqcloud.com/images/home/avatar_default.png',
           gender: userInfo.gender === 1 ? 'male' : userInfo.gender === 2 ? 'female' : null,
           city: userInfo.city,
           province: userInfo.province,
