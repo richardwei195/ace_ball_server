@@ -62,8 +62,7 @@ export class TennisAnalysisService {
 
       const prompt = `
 请分析这个网球视频，并根据NTRP（National Tennis Rating Program）标准对球员进行评分, 评分标准请严谨、严格，水平尽量应该不超过 3 分。
-请以JSON格式返回分析结果，包含以下字段：
-
+请以JSON格式返回分析结果，包含以下字段
 {
   "overallRating": 整体NTRP评分 (1.0-7.0),
   "serve": {
@@ -88,7 +87,7 @@ export class TennisAnalysisService {
   },
   "improvements": ["改进建议1", "改进建议2", "改进建议3"]
 }
-请仔细观察球员的技术动作、战术意识、移动能力等方面，给出专业的评分和建议，如果遇到识别模糊、不清楚的地方，也请在原因中告知用户，并且这种评分通常是 0-1 之间, 不要模糊的评判用户的行为。
+请仔细观察球员的技术动作、战术意识、移动能力等方面，给出专业的评分和建议，如果遇到不明确、看不见的地方，直接0分。
 `;
 
       const response = await this.openai.chat.completions.create({
@@ -204,5 +203,11 @@ export class TennisAnalysisService {
     if (!Array.isArray(result.improvements)) {
       throw new BadRequestException('改进建议必须是数组格式');
     }
+
+    // 重新计算整体评分，根据 technicalFields 的评分，计算平均值，并且整体评分应该在 1-7 之间，间隔是 0.5
+    const technicalScores = technicalFields.map(field => result[field].score);
+    const averageScore = technicalScores.reduce((sum, score) => sum + score, 0) / technicalScores.length;
+    result.overallRating = Math.round(averageScore * 2) / 2;
+
   }
 } 
