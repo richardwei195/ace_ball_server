@@ -272,7 +272,7 @@ export class WechatService {
           unionid: session.unionid,
           sessionKey: session.session_key,
           name: loginDto.nickName || '网球用户',
-          avatar: loginDto.avatarUrl || '',
+          avatar: loginDto.avatarUrl || 'https://tennis-1251306435.cos.ap-nanjing.myqcloud.com/images/home/avatar_default.png',
           lastLoginAt: new Date(),
         },
       });
