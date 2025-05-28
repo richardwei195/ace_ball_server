@@ -87,7 +87,7 @@ export class TennisAnalysisService {
   },
   "improvements": ["改进建议1", "改进建议2", "改进建议3"]
 }
-请仔细观察球员的技术动作、战术意识、移动能力等方面，给出专业的评分和建议，如果遇到不明确、看不见的地方，直接0分。
+请仔细观察球员的技术动作、战术意识、移动能力等方面，给出专业的评分和建议，如果遇到不明确、看不见的地方，直接0~1分。
 `;
 
       const response = await this.openai.chat.completions.create({
