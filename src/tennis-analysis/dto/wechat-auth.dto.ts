@@ -62,9 +62,6 @@ export class WechatAuthResponseDto {
   @ApiProperty({ description: '用户在开放平台的唯一标识', example: 'o6_bmjrPTlm6_2sgVt7hMZOPfL2M', required: false })
   unionid?: string;
 
-  @ApiProperty({ description: '会话密钥', example: 'tiihtNczf5v6AKRyjwEUhQ==' })
-  sessionKey: string;
-
   @ApiProperty({ description: 'JWT访问令牌', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
   accessToken: string;
 

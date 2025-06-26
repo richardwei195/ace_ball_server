@@ -87,7 +87,6 @@ export class WechatService {
       const response: WechatAuthResponseDto = {
         openid: session.openid,
         unionid: session.unionid,
-        sessionKey: session.session_key,
         accessToken,
         avatarUrl: user.avatar,
         nickName: user.name,
