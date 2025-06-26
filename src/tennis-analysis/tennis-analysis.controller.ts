@@ -3,11 +3,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiBearerAut
 import { TennisAnalysisService } from './tennis-analysis.service';
 import { WechatService } from './wechat.service';
 import { TennisScoreService } from './tennis-score.service';
+import { TennisVenueService } from './tennis-venue.service';
 import { CosService } from './cos.service';
 import { AnalyzeVideoDto } from './dto/analyze-video.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
 import { WechatLoginDto, WechatUserInfoDto, WechatAuthResponseDto, UserProfileDto } from './dto/wechat-auth.dto';
 import { QueryTennisScoreDto, TennisScoreStatsDto } from './dto/tennis-score.dto';
+import { QueryTennisVenueDto, TennisVenueListResponseDto, TennisVenueDto } from './dto/tennis-venue.dto';
 import { GetUploadTokenDto, CosUploadTokenResponseDto } from './dto/cos-upload.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
@@ -22,6 +24,7 @@ export class TennisAnalysisController {
     private readonly tennisAnalysisService: TennisAnalysisService,
     private readonly wechatService: WechatService,
     private readonly tennisScoreService: TennisScoreService,
+    private readonly tennisVenueService: TennisVenueService,
     private readonly cosService: CosService,
     private readonly redisService: RedisService,
   ) { }
@@ -333,5 +336,155 @@ export class TennisAnalysisController {
     }
 
     return this.cosService.getUploadToken(userInfo.id, uploadDto);
+  }
+
+  @Get('venues')
+  @ApiOperation({
+    summary: '获取网球场馆列表',
+    description: '分页获取网球场馆列表，支持城市、预订方式、营业状态等筛选条件'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    type: TennisVenueListResponseDto,
+  })
+  async getVenues(@Query() queryDto: QueryTennisVenueDto): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.getVenues(queryDto);
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取场馆列表成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getVenues error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '获取场馆列表失败',
+        data: null,
+      };
+    }
+  }
+
+  @Get('venues/:id')
+  @ApiOperation({
+    summary: '获取场馆详情',
+    description: '根据场馆ID获取详细信息'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    type: TennisVenueDto,
+  })
+  async getVenueById(@Param('id') id: number): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.getVenueById(id);
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取场馆详情成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getVenueById error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '获取场馆详情失败',
+        data: null,
+      };
+    }
+  }
+
+  @Get('venues/popular/list')
+  @ApiOperation({
+    summary: '获取热门场馆',
+    description: '获取热门推荐的网球场馆列表'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    type: [TennisVenueDto],
+  })
+  async getPopularVenues(@Query('limit') limit?: number): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.getPopularVenues(limit || 10);
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取热门场馆成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getPopularVenues error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '获取热门场馆失败',
+        data: null,
+      };
+    }
+  }
+
+  @Get('venues/search/keyword')
+  @ApiOperation({
+    summary: '搜索场馆',
+    description: '根据关键词搜索网球场馆'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '搜索成功',
+    type: [TennisVenueDto],
+  })
+  async searchVenues(
+    @Query('keyword') keyword: string,
+    @Query('limit') limit?: number
+  ): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.searchVenues(keyword, limit || 20);
+      return {
+        code: API_CODE.SUCCESS,
+        message: '搜索场馆成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('searchVenues error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '搜索场馆失败',
+        data: null,
+      };
+    }
+  }
+
+  @Get('venues/cities/available')
+  @ApiOperation({
+    summary: '获取可用城市列表',
+    description: '获取有场馆的城市列表'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'number', example: 200 },
+        message: { type: 'string', example: '获取城市列表成功' },
+        data: { type: 'array', items: { type: 'string' }, example: ['广州', '深圳', '北京'] }
+      }
+    }
+  })
+  async getAvailableCities(): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.getAvailableCities();
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取城市列表成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getAvailableCities error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '获取城市列表失败',
+        data: null,
+      };
+    }
   }
 } 
