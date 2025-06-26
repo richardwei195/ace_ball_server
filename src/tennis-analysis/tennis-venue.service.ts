@@ -343,11 +343,8 @@ export class TennisVenueService {
     switch (method.type) {
       case BookingMethodType.H5:
       case BookingMethodType.APP:
-        if (method.url) result.url = method.url;
-        break;
       case BookingMethodType.MINIPROGRAM:
-        if (method.appId) result.appId = method.appId;
-        if (method.path) result.path = method.path;
+        if (method.url) result.url = method.url;
         break;
       case BookingMethodType.PHONE:
         if (method.phone) result.phone = method.phone;
