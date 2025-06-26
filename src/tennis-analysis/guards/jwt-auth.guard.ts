@@ -4,7 +4,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -19,6 +19,7 @@ export class JwtAuthGuard implements CanActivate {
       // 将用户信息附加到请求对象上
       request['user'] = payload;
     } catch (error) {
+      console.log('jwt auth error', error);
       throw new UnauthorizedException('访问令牌无效');
     }
 
