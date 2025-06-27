@@ -7,7 +7,8 @@ export const tennisVenueSeeds = [
     name: '广州天河体育中心',
     city: '广州',
     location: '天河区体育西路',
-    openTime: '08:00-20:00',
+    openStartTime: 480, // 08:00 = 8*60 = 480分钟
+    openEndTime: 1200,  // 20:00 = 20*60 = 1200分钟
     isOpen: true,
     priceRange: '¥50-120/小时',
     features: ['标准场地', '器材租赁', '教练服务'],
@@ -50,7 +51,8 @@ export const tennisVenueSeeds = [
     name: '深圳湾体育中心',
     city: '深圳',
     location: '南山区深圳湾体育中心',
-    openTime: '06:00-22:00',
+    openStartTime: 360,  // 06:00 = 6*60 = 360分钟
+    openEndTime: 1320,   // 22:00 = 22*60 = 1320分钟
     isOpen: true,
     priceRange: '¥80-200/小时',
     features: ['专业场地', '夜间照明', '停车便利', '教练服务'],
@@ -93,7 +95,8 @@ export const tennisVenueSeeds = [
     name: '北京朝阳公园网球中心',
     city: '北京',
     location: '朝阳区朝阳公园南路8号',
-    openTime: '07:00-21:00',
+    openStartTime: 420,  // 07:00 = 7*60 = 420分钟
+    openEndTime: 1260,   // 21:00 = 21*60 = 1260分钟
     isOpen: true,
     priceRange: '¥60-150/小时',
     features: ['标准场地', '器材租赁', '教练培训', '比赛场地'],
@@ -134,7 +137,8 @@ export const tennisVenueSeeds = [
     name: '上海徐家汇体育公园',
     city: '上海',
     location: '徐汇区漕溪北路1111号',
-    openTime: '06:30-21:30',
+    openStartTime: 390,  // 06:30 = 6*60+30 = 390分钟
+    openEndTime: 1290,   // 21:30 = 21*60+30 = 1290分钟
     isOpen: true,
     priceRange: '¥70-180/小时',
     features: ['标准场地', '夜间照明', '器材租赁', '教练服务', '淋浴设施'],
@@ -177,7 +181,8 @@ export const tennisVenueSeeds = [
     name: '杭州黄龙体育中心',
     city: '杭州',
     location: '西湖区曙光路黄龙体育中心',
-    openTime: '08:00-20:00',
+    openStartTime: 480,  // 08:00 = 8*60 = 480分钟
+    openEndTime: 1200,   // 20:00 = 20*60 = 1200分钟
     isOpen: true,
     priceRange: '¥45-100/小时',
     features: ['标准场地', '器材租赁', '教练服务', '停车便利'],
@@ -210,7 +215,8 @@ export const tennisVenueSeeds = [
     name: '成都猛追湾游泳场网球中心',
     city: '成都',
     location: '成华区猛追湾街168号',
-    openTime: '09:00-21:00',
+    openStartTime: 540,  // 09:00 = 9*60 = 540分钟
+    openEndTime: 1260,   // 21:00 = 21*60 = 1260分钟
     isOpen: true,
     priceRange: '¥40-90/小时',
     features: ['标准场地', '器材租赁', '教练服务'],

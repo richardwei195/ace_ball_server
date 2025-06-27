@@ -34,11 +34,18 @@ export class TennisVenue extends Model {
   declare location: string;
 
   @Column({
-    type: DataType.STRING(50),
+    type: DataType.INTEGER,
     allowNull: false,
-    comment: '营业时间',
+    comment: '营业开始时间 (以分钟为单位，从00:00开始计算，如480表示08:00)',
   })
-  declare openTime: string;
+  declare openStartTime: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    comment: '营业结束时间 (以分钟为单位，从00:00开始计算，如1200表示20:00)',
+  })
+  declare openEndTime: number;
 
   @Column({
     type: DataType.BOOLEAN,
@@ -99,4 +106,35 @@ export class TennisVenue extends Model {
   // 关联预订方式
   @HasMany(() => require('./tennis-venue-booking-method.model').TennisVenueBookingMethod)
   declare bookingMethods: any[];
+
+  // 虚拟字段：将分钟转换为 HH:mm 格式
+  get openStartTimeFormatted(): string {
+    const hours = Math.floor(this.openStartTime / 60);
+    const minutes = this.openStartTime % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  get openEndTimeFormatted(): string {
+    const hours = Math.floor(this.openEndTime / 60);
+    const minutes = this.openEndTime % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  // 向后兼容的虚拟字段
+  get openTime(): string {
+    return `${this.openStartTimeFormatted}-${this.openEndTimeFormatted}`;
+  }
+
+  // 静态方法：将 HH:mm 格式转换为分钟
+  static timeToMinutes(timeStr: string): number {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  // 静态方法：将分钟转换为 HH:mm 格式
+  static minutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
 } 

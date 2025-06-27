@@ -31,7 +31,16 @@ export class TennisVenueService {
     try {
       this.logger.log(`获取网球场馆列表，查询参数: ${JSON.stringify(queryDto)}`);
 
-      const { page = 1, limit = 10, city, bookingTypes, isOpen, keyword } = queryDto;
+      const {
+        page = 1,
+        limit = 10,
+        city,
+        bookingTypes,
+        isOpen,
+        keyword,
+        openStartTimeBefore,
+        openEndTimeAfter
+      } = queryDto;
       const offset = (page - 1) * limit;
 
       // 构建主查询条件
@@ -51,6 +60,17 @@ export class TennisVenueService {
           { location: { [Op.like]: `%${keyword}%` } },
           { description: { [Op.like]: `%${keyword}%` } }
         ];
+      }
+
+      // 营业时间筛选 - 使用整型比较，更简单高效
+      if (openStartTimeBefore) {
+        const minutesBefore = TennisVenue.timeToMinutes(openStartTimeBefore);
+        whereConditions.openStartTime = { [Op.lte]: minutesBefore };
+      }
+
+      if (openEndTimeAfter) {
+        const minutesAfter = TennisVenue.timeToMinutes(openEndTimeAfter);
+        whereConditions.openEndTime = { [Op.gte]: minutesAfter };
       }
 
       // 构建预订方式筛选条件
@@ -152,10 +172,15 @@ export class TennisVenueService {
     try {
       this.logger.log(`创建场馆，数据: ${JSON.stringify(createDto)}`);
 
-      const venue = await this.tennisVenueModel.create({
+      // 将时间字符串转换为分钟
+      const venueData = {
         ...createDto,
+        openStartTime: TennisVenue.timeToMinutes(createDto.openStartTime),
+        openEndTime: TennisVenue.timeToMinutes(createDto.openEndTime),
         sortOrder: createDto.sortOrder || 0,
-      });
+      };
+
+      const venue = await this.tennisVenueModel.create(venueData);
 
       const result = this.formatVenueResponse(venue);
       this.logger.log(`创建场馆成功，ID: ${venue.id}`);
@@ -313,6 +338,8 @@ export class TennisVenueService {
       name: venue.name,
       city: venue.city,
       location: venue.location,
+      openStartTime: venue.openStartTimeFormatted,
+      openEndTime: venue.openEndTimeFormatted,
       openTime: venue.openTime,
       isOpen: venue.isOpen,
       priceRange: venue.priceRange,

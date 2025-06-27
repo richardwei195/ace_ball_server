@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, Min, Max, IsEnum, IsArray, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min, Max, IsEnum, IsArray, IsBoolean, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { BookingMethodType } from '../models/tennis-venue-booking-method.model';
@@ -46,6 +46,26 @@ export class QueryTennisVenueDto {
   @IsOptional()
   @IsString()
   keyword?: string;
+
+  @ApiProperty({
+    description: '营业开始时间筛选 (HH:mm格式，筛选在此时间之前或等于此时间开始营业的场馆)',
+    example: '08:00',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业开始时间格式必须为 HH:mm' })
+  openStartTimeBefore?: string;
+
+  @ApiProperty({
+    description: '营业结束时间筛选 (HH:mm格式，筛选在此时间之后或等于此时间结束营业的场馆)',
+    example: '22:00',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业结束时间格式必须为 HH:mm' })
+  openEndTimeAfter?: string;
 }
 
 export class BookingMethodDto {
@@ -87,7 +107,13 @@ export class TennisVenueDto {
   @ApiProperty({ description: '场馆地址', example: '天河区体育西路' })
   location: string;
 
-  @ApiProperty({ description: '营业时间', example: '08:00-20:00' })
+  @ApiProperty({ description: '营业开始时间', example: '08:00' })
+  openStartTime: string;
+
+  @ApiProperty({ description: '营业结束时间', example: '20:00' })
+  openEndTime: string;
+
+  @ApiProperty({ description: '营业时间（兼容性字段）', example: '08:00-20:00' })
   openTime: string;
 
   @ApiProperty({ description: '是否营业', example: true })
@@ -148,9 +174,15 @@ export class CreateTennisVenueDto {
   @IsString()
   location: string;
 
-  @ApiProperty({ description: '营业时间', example: '08:00-20:00' })
+  @ApiProperty({ description: '营业开始时间', example: '08:00' })
   @IsString()
-  openTime: string;
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业开始时间格式必须为 HH:mm' })
+  openStartTime: string;
+
+  @ApiProperty({ description: '营业结束时间', example: '20:00' })
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业结束时间格式必须为 HH:mm' })
+  openEndTime: string;
 
   @ApiProperty({ description: '是否营业', example: true })
   @IsBoolean()

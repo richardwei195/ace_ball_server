@@ -2,7 +2,7 @@
 
 ## 概述
 
-网球场馆预订API提供了完整的场馆信息查询功能，支持多种筛选条件和预订方式。用户可以根据城市、预订方式、营业状态等条件来查找合适的网球场馆。
+网球场馆预订API提供了完整的场馆信息查询功能，支持多种筛选条件和预订方式。用户可以根据城市、预订方式、营业状态、营业时间等条件来查找合适的网球场馆。
 
 ## 数据库设计
 
@@ -14,7 +14,8 @@
 | name | VARCHAR(100) | 场馆名称 | "广州天河体育中心" |
 | city | VARCHAR(50) | 所在城市（带索引） | "广州" |
 | location | VARCHAR(200) | 场馆地址 | "天河区体育西路" |
-| open_time | VARCHAR(50) | 营业时间 | "08:00-20:00" |
+| open_start_time | INTEGER | 营业开始时间 (以分钟为单位，从00:00开始计算) | 480 (表示08:00) |
+| open_end_time | INTEGER | 营业结束时间 (以分钟为单位，从00:00开始计算) | 1200 (表示20:00) |
 | is_open | BOOLEAN | 是否营业 | true |
 | price_range | VARCHAR(50) | 价格区间 | "¥50-120/小时" |
 | features | JSON | 场馆特色服务 | ["标准场地", "器材租赁"] |
@@ -23,6 +24,12 @@
 | sort_order | INTEGER | 排序权重 | 100 |
 | created_at | DATETIME | 创建时间 | "2024-01-01 00:00:00" |
 | updated_at | DATETIME | 更新时间 | "2024-01-01 00:00:00" |
+
+> **注意：** 
+> - 营业时间在数据库中以整型分钟值存储，便于高效筛选和比较
+> - 时间转换规则：`分钟值 = 小时 * 60 + 分钟`，例如：08:00 = 8*60 = 480分钟，20:30 = 20*60+30 = 1230分钟
+> - API接口仍使用 HH:mm 格式，系统内部自动进行转换
+> - 模型中提供虚拟字段自动格式化为用户友好的时间格式
 
 ### 预订方式表 (t_tennis_venue_booking_methods)
 
@@ -61,6 +68,22 @@
 | bookingTypes | array | 否 | 预订方式筛选 | ["h5", "miniprogram"] |
 | isOpen | boolean | 否 | 是否营业 | true |
 | keyword | string | 否 | 关键词搜索 | "体育中心" |
+| openStartTimeBefore | string | 否 | 营业开始时间筛选 (HH:mm格式，筛选在此时间之前或等于此时间开始营业的场馆) | "08:00" |
+| openEndTimeAfter | string | 否 | 营业结束时间筛选 (HH:mm格式，筛选在此时间之后或等于此时间结束营业的场馆) | "22:00" |
+
+**营业时间筛选说明:**
+
+- `openStartTimeBefore`: 筛选营业开始时间 ≤ 指定时间的场馆（适用于查找早开门的场馆）
+- `openEndTimeAfter`: 筛选营业结束时间 ≥ 指定时间的场馆（适用于查找晚关门的场馆）
+- 时间格式严格要求为 HH:mm（24小时制），如 "08:00", "22:30"
+- 两个参数可以组合使用，例如：`openStartTimeBefore=08:00&openEndTimeAfter=22:00` 表示查找 8点前开门且 22点后关门的场馆
+
+**筛选示例:**
+
+1. 查找早上8点前开门的场馆：`?openStartTimeBefore=08:00`
+2. 查找晚上10点后关门的场馆：`?openEndTimeAfter=22:00`
+3. 查找早开晚关的场馆：`?openStartTimeBefore=08:00&openEndTimeAfter=22:00`
+4. 组合城市和营业时间筛选：`?city=广州&openStartTimeBefore=07:00&openEndTimeAfter=21:00`
 
 **响应示例:**
 
@@ -75,6 +98,8 @@
         "city": "广州",
         "name": "广州天河体育中心",
         "location": "天河区体育西路",
+        "openStartTime": "08:00",
+        "openEndTime": "20:00",
         "openTime": "08:00-20:00",
         "isOpen": true,
         "priceRange": "¥50-120/小时",
