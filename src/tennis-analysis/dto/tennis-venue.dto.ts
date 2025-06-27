@@ -116,6 +116,9 @@ export class TennisVenueDto {
   @ApiProperty({ description: '营业时间（兼容性字段）', example: '08:00-20:00' })
   openTime: string;
 
+  @ApiProperty({ description: '预订时间', example: 'T-1 10:00' })
+  bookingStartTime: string;
+
   @ApiProperty({ description: '是否营业', example: true })
   isOpen: boolean;
 

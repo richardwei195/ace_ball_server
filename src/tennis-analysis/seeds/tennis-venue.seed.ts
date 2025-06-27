@@ -9,6 +9,7 @@ export const tennisVenueSeeds = [
     location: '天河区体育西路',
     openStartTime: 480, // 08:00 = 8*60 = 480分钟
     openEndTime: 1200,  // 20:00 = 20*60 = 1200分钟
+    bookingStartTime: 'T-1 08:00',
     isOpen: true,
     priceRange: '¥50-120/小时',
     features: ['标准场地', '器材租赁', '教练服务'],
@@ -53,6 +54,7 @@ export const tennisVenueSeeds = [
     location: '南山区深圳湾体育中心',
     openStartTime: 360,  // 06:00 = 6*60 = 360分钟
     openEndTime: 1320,   // 22:00 = 22*60 = 1320分钟
+    bookingStartTime: 'T-1 07:00',
     isOpen: true,
     priceRange: '¥80-200/小时',
     features: ['专业场地', '夜间照明', '停车便利', '教练服务'],
@@ -97,6 +99,7 @@ export const tennisVenueSeeds = [
     location: '朝阳区朝阳公园南路8号',
     openStartTime: 420,  // 07:00 = 7*60 = 420分钟
     openEndTime: 1260,   // 21:00 = 21*60 = 1260分钟
+    bookingStartTime: 'T-2 09:00',
     isOpen: true,
     priceRange: '¥60-150/小时',
     features: ['标准场地', '器材租赁', '教练培训', '比赛场地'],
@@ -139,6 +142,7 @@ export const tennisVenueSeeds = [
     location: '徐汇区漕溪北路1111号',
     openStartTime: 390,  // 06:30 = 6*60+30 = 390分钟
     openEndTime: 1290,   // 21:30 = 21*60+30 = 1290分钟
+    bookingStartTime: 'T-1 06:30',
     isOpen: true,
     priceRange: '¥70-180/小时',
     features: ['标准场地', '夜间照明', '器材租赁', '教练服务', '淋浴设施'],
@@ -183,6 +187,7 @@ export const tennisVenueSeeds = [
     location: '西湖区曙光路黄龙体育中心',
     openStartTime: 480,  // 08:00 = 8*60 = 480分钟
     openEndTime: 1200,   // 20:00 = 20*60 = 1200分钟
+    bookingStartTime: 'T-3 10:00',
     isOpen: true,
     priceRange: '¥45-100/小时',
     features: ['标准场地', '器材租赁', '教练服务', '停车便利'],
@@ -217,6 +222,7 @@ export const tennisVenueSeeds = [
     location: '成华区猛追湾街168号',
     openStartTime: 540,  // 09:00 = 9*60 = 540分钟
     openEndTime: 1260,   // 21:00 = 21*60 = 1260分钟
+    bookingStartTime: 'T-1 09:00',
     isOpen: true,
     priceRange: '¥40-90/小时',
     features: ['标准场地', '器材租赁', '教练服务'],

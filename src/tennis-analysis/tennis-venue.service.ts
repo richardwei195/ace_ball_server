@@ -340,6 +340,7 @@ export class TennisVenueService {
       location: venue.location,
       openStartTime: venue.openStartTimeFormatted,
       openEndTime: venue.openEndTimeFormatted,
+      bookingStartTime: venue.bookingStartTime,
       openTime: venue.openTime,
       isOpen: venue.isOpen,
       priceRange: venue.priceRange,

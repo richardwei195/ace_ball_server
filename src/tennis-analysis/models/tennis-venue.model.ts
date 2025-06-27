@@ -47,6 +47,15 @@ export class TennisVenue extends Model {
   })
   declare openEndTime: number;
 
+  // 预订时间
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: false,
+    comment: '预订时间，纯文本，比如  T-1 10:00',
+  })
+  declare bookingStartTime: string;
+
+
   @Column({
     type: DataType.BOOLEAN,
     allowNull: false,
