@@ -66,6 +66,16 @@ export class QueryTennisVenueDto {
   @IsString()
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业结束时间格式必须为 HH:mm' })
   openEndTimeAfter?: string;
+
+  @ApiProperty({
+    description: '特色服务筛选 (多个特色用逗号分隔，场馆需包含所有指定的特色服务)',
+    example: '风雨场,夜间照明,教练服务',
+    required: false,
+    type: String
+  })
+  @IsOptional()
+  @IsString()
+  features?: string;
 }
 
 export class BookingMethodDto {

@@ -39,7 +39,8 @@ export class TennisVenueService {
         isOpen,
         keyword,
         openStartTimeBefore,
-        openEndTimeAfter
+        openEndTimeAfter,
+        features
       } = queryDto;
       const offset = (page - 1) * limit;
 
@@ -71,6 +72,27 @@ export class TennisVenueService {
       if (openEndTimeAfter) {
         const minutesAfter = TennisVenue.timeToMinutes(openEndTimeAfter);
         whereConditions.openEndTime = { [Op.gte]: minutesAfter };
+      }
+
+      // 特色服务筛选 - 场馆需包含所有指定的特色服务
+      if (features) {
+        // 将逗号分隔的字符串转换为数组
+        const featureArray = features.split(',').map(f => f.trim()).filter(f => f.length > 0);
+
+        if (featureArray.length > 0) {
+          // 使用 JSON_CONTAINS 进行数组匹配（适用于MySQL/PostgreSQL）
+          // 对于每个指定的特色，都必须存在于场馆的 features 数组中
+          const featureConditions = featureArray.map(feature =>
+            Sequelize.where(
+              Sequelize.fn('JSON_CONTAINS', Sequelize.col('features'), JSON.stringify(feature)),
+              1
+            )
+          );
+
+          // 所有特色都必须匹配
+          whereConditions[Op.and] = whereConditions[Op.and] || [];
+          whereConditions[Op.and] = whereConditions[Op.and].concat(featureConditions);
+        }
       }
 
       // 构建预订方式筛选条件

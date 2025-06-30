@@ -22,7 +22,7 @@ async function bootstrap() {
   // 使用全局中间件记录请求日志
   app.use((req, res, next) => {
     const startTime = Date.now();
-    
+
     res.on('finish', () => {
       const duration = Date.now() - startTime;
       console.log(
@@ -33,14 +33,18 @@ async function bootstrap() {
     next();
   });
 
-  // swigger
-  const config = new DocumentBuilder()
-    .setTitle('Love Tips API')
-    .setDescription('Love Tips API description')
-    .setVersion('1.0')
-    .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, documentFactory);
+  if (process.env.NODE_ENV === 'development') {
+    // swigger
+    const config = new DocumentBuilder()
+      .setTitle('Love Tips API')
+      .setDescription('Love Tips API description')
+      .setVersion('1.0')
+      .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, documentFactory);
+
+  }
+
 
 
   await app.listen(process.env.PORT ?? 3000);
