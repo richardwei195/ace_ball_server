@@ -240,54 +240,6 @@ export class WechatService {
   }
 
   /**
-   * 保存或更新用户详细信息（获取用户信息时）
-   */
-  private async saveOrUpdateUserInfo(userInfo: DecryptedUserInfo, session: WechatSession): Promise<User> {
-    try {
-      const [user, created] = await this.userModel.findOrCreate({
-        where: { openid: userInfo.openId },
-        defaults: {
-          id: uuidv4(),
-          openid: userInfo.openId,
-          unionid: userInfo.unionId,
-          sessionKey: session.session_key,
-          name: userInfo.nickName,
-          avatar: userInfo.avatarUrl || 'https://tennis-1251306435.cos.ap-nanjing.myqcloud.com/images/home/avatar_default.png',
-          gender: userInfo.gender === 1 ? 'male' : userInfo.gender === 2 ? 'female' : null,
-          city: userInfo.city,
-          province: userInfo.province,
-          country: userInfo.country,
-          language: userInfo.language,
-          lastLoginAt: new Date(),
-        },
-      });
-
-      if (!created) {
-        // 更新现有用户详细信息
-        await user.update({
-          unionid: userInfo.unionId,
-          sessionKey: session.session_key,
-          name: userInfo.nickName,
-          avatar: userInfo.avatarUrl,
-          gender: userInfo.gender === 1 ? 'male' : userInfo.gender === 2 ? 'female' : user.gender,
-          city: userInfo.city,
-          province: userInfo.province,
-          country: userInfo.country,
-          language: userInfo.language,
-          lastLoginAt: new Date(),
-        });
-      }
-
-      this.logger.log(`用户详细信息${created ? '创建' : '更新'}成功，openid: ${userInfo.openId}`);
-      return user;
-
-    } catch (error) {
-      this.logger.error(`保存用户详细信息失败: ${error.message}`, error.stack);
-      throw new BadRequestException('保存用户详细信息失败');
-    }
-  }
-
-  /**
    * 根据openid获取用户信息
    */
   async getUserByOpenid(openid: string): Promise<User | null> {
