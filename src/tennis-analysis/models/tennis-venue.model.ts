@@ -116,6 +116,10 @@ export class TennisVenue extends Model {
   @HasMany(() => require('./tennis-venue-booking-method.model').TennisVenueBookingMethod)
   declare bookingMethods: any[];
 
+  // 关联评分
+  @HasMany(() => require('./tennis-venue-rating.model').TennisVenueRating)
+  declare ratings: any[];
+
   // 虚拟字段：将分钟转换为 HH:mm 格式
   get openStartTimeFormatted(): string {
     const hours = Math.floor(this.openStartTime / 60);
