@@ -401,4 +401,39 @@ export class TennisAnalysisController {
     }
   }
 
+
+  @Get('venues/cities/available')
+  @ApiOperation({
+    summary: '获取可用城市列表',
+    description: '获取有场馆的城市列表'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '获取成功',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'number', example: 200 },
+        message: { type: 'string', example: '获取城市列表成功' },
+        data: { type: 'array', items: { type: 'string' }, example: ['广州', '深圳', '北京'] }
+      }
+    }
+  })
+  async getAvailableCities(): Promise<any> {
+    try {
+      const result = await this.tennisVenueService.getAvailableCities();
+      return {
+        code: API_CODE.SUCCESS,
+        message: '获取城市列表成功',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('getAvailableCities error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '获取城市列表失败',
+        data: null,
+      };
+    }
+  }
 } 
