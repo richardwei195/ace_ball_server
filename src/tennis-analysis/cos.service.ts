@@ -21,8 +21,8 @@ export class CosService {
     this.secretId = this.configService.get<string>('TENCENT_SECRET_ID') || '';
     this.secretKey = this.configService.get<string>('TENCENT_SECRET_KEY') || '';
     this.bucket = this.configService.get<string>('COS_BUCKET') || '';
-    this.region = this.configService.get<string>('COS_REGION') || 'ap-nanjing';
-    this.cdnDomain = this.configService.get<string>('COS_CDN_DOMAIN') || '';
+    this.region = this.configService.get<string>('COS_REGION') || 'ap-guangzhou';
+    this.cdnDomain = this.configService.get<string>('COS_CDN_DOMAIN') || 'https://cdn.richarjiang.com';
     this.allowPrefix = this.configService.get<string>('COS_ALLOW_PREFIX') || 'tennis-uploads/*';
 
     if (!this.secretId || !this.secretKey || !this.bucket) {
