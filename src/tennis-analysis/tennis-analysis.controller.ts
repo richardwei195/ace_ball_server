@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete, HttpException, Logger } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Param, Delete, Put, HttpException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TennisAnalysisService } from './tennis-analysis.service';
 import { WechatService } from './wechat.service';
@@ -7,7 +7,7 @@ import { TennisVenueService } from './tennis-venue.service';
 import { CosService } from './cos.service';
 import { AnalyzeVideoDto } from './dto/analyze-video.dto';
 import { TennisAnalysisResponseDto } from './dto/tennis-analysis-response.dto';
-import { WechatLoginDto, WechatUserInfoDto, WechatAuthResponseDto, UserProfileDto } from './dto/wechat-auth.dto';
+import { WechatLoginDto, WechatAuthResponseDto, UserProfileDto, UpdateUserProfileDto } from './dto/wechat-auth.dto';
 import { QueryTennisScoreDto, TennisScoreStatsDto } from './dto/tennis-score.dto';
 import { QueryTennisVenueDto, TennisVenueListResponseDto, TennisVenueDto } from './dto/tennis-venue.dto';
 import { GetUploadTokenDto, CosUploadTokenResponseDto } from './dto/cos-upload.dto';
@@ -113,24 +113,6 @@ export class TennisAnalysisController {
     return this.wechatService.login(loginDto);
   }
 
-  @Post('auth/user-info')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: '获取用户详细信息',
-    description: '解密微信用户信息，获取用户详细资料'
-  })
-  @ApiResponse({
-    status: 200,
-    description: '获取成功',
-    type: UserProfileDto,
-  })
-  @ApiBadRequestResponse({
-    description: '获取失败',
-  })
-  async getUserInfo(@Body() userInfoDto: WechatUserInfoDto): Promise<UserProfileDto> {
-    return this.wechatService.getUserInfo(userInfoDto);
-  }
-
   @Get('auth/profile')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -153,6 +135,40 @@ export class TennisAnalysisController {
     return {
       user: userInfo,
       message: '用户信息获取成功'
+    };
+  }
+
+  @Put('auth/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '更新用户信息',
+    description: '更新当前用户的个人信息，包括头像、昵称、性别、NTRP评分和惯用手'
+  })
+  @ApiResponse({
+    status: 200,
+    description: '更新成功',
+    schema: {
+      type: 'object',
+      properties: {
+        user: { type: 'object', description: '更新后的用户信息' },
+        message: { type: 'string', description: '响应消息' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: '请求参数错误或更新失败',
+  })
+  async updateProfile(@Body() updateDto: UpdateUserProfileDto, @User() user: any): Promise<any> {
+    this.logger.log('updateProfile user', user);
+    this.logger.log('updateProfile updateDto', updateDto);
+
+    const updatedUser = await this.wechatService.updateUserProfile(user.openid, updateDto);
+
+    return {
+      user: updatedUser,
+      message: '用户信息更新成功'
     };
   }
 

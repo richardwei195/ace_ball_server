@@ -105,64 +105,6 @@ export class WechatService {
   }
 
   /**
-   * 获取用户详细信息（解密）
-   */
-  async getUserInfo(userInfoDto: WechatUserInfoDto): Promise<UserProfileDto> {
-    try {
-      this.logger.log(`开始获取用户详细信息`);
-
-      // 先获取session_key
-      const session = await this.getWechatSession(userInfoDto.code);
-
-      if (session.errcode) {
-        throw new BadRequestException(`获取session失败: ${session.errmsg}`);
-      }
-
-      // 解密用户信息
-      const decryptedData = this.decryptData(
-        userInfoDto.encryptedData,
-        session.session_key,
-        userInfoDto.iv
-      );
-
-      const userInfo: DecryptedUserInfo = JSON.parse(decryptedData);
-
-      // 验证水印
-      if (userInfo.watermark.appid !== this.appId) {
-        throw new UnauthorizedException('用户信息水印验证失败');
-      }
-
-      // 保存或更新用户信息到数据库
-      const savedUser = await this.saveOrUpdateUserInfo(userInfo, session);
-
-      const profile: UserProfileDto = {
-        id: 1, // TODO: 从数据库获取真实ID
-        openid: userInfo.openId,
-        unionid: userInfo.unionId,
-        nickName: userInfo.nickName,
-        avatarUrl: userInfo.avatarUrl,
-        gender: userInfo.gender,
-        city: userInfo.city,
-        province: userInfo.province,
-        country: userInfo.country,
-        language: userInfo.language,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      this.logger.log(`获取用户详细信息成功，openid: ${userInfo.openId}`);
-      return profile;
-
-    } catch (error) {
-      this.logger.error(`获取用户信息失败: ${error.message}`, error.stack);
-      if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new BadRequestException(`获取用户信息失败: ${error.message}`);
-    }
-  }
-
-  /**
    * 验证JWT token
    */
   async verifyToken(token: string): Promise<any> {
@@ -356,6 +298,65 @@ export class WechatService {
     } catch (error) {
       this.logger.error(`获取用户信息失败: ${error.message}`, error.stack);
       return null;
+    }
+  }
+
+  /**
+   * 更新用户信息
+   */
+  async updateUserProfile(openid: string, updateData: any): Promise<User> {
+    try {
+      const user = await this.userModel.findOne({
+        where: { openid },
+      });
+
+      if (!user) {
+        throw new BadRequestException('用户不存在');
+      }
+
+      // 构建更新数据对象
+      const updateFields: any = {};
+
+      if (updateData.name !== undefined) {
+        updateFields.name = updateData.name;
+      }
+
+      if (updateData.avatar !== undefined) {
+        updateFields.avatar = updateData.avatar;
+      }
+
+      if (updateData.gender !== undefined) {
+        updateFields.gender = updateData.gender;
+      }
+
+      if (updateData.ntrpRating !== undefined) {
+        updateFields.ntrpRating = updateData.ntrpRating;
+      }
+
+      if (updateData.dominantHand !== undefined) {
+        updateFields.dominantHand = updateData.dominantHand;
+      }
+
+      if (updateData.tennisExperience !== undefined) {
+        // 验证网球经验是否为0.5的倍数
+        if (updateData.tennisExperience % 0.5 !== 0) {
+          throw new BadRequestException('网球经验必须是0.5年的倍数');
+        }
+        updateFields.tennisExperience = updateData.tennisExperience;
+      }
+
+      // 更新用户信息
+      await user.update(updateFields);
+
+      this.logger.log(`用户信息更新成功，openid: ${openid}`);
+      return user;
+
+    } catch (error) {
+      this.logger.error(`更新用户信息失败: ${error.message}`, error.stack);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('更新用户信息失败');
     }
   }
 } 
