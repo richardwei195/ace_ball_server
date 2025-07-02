@@ -28,6 +28,11 @@ export class QueryTennisScoreDto {
   @Max(100)
   limit?: number = 10;
 
+  @ApiProperty({ description: '用户ID（可选，用于查询指定用户的评分记录）', example: '123', required: false })
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
   @ApiProperty({ description: '最小评分', example: 1.0, required: false })
   @IsOptional()
   @Type(() => Number)

@@ -120,7 +120,7 @@ export class TennisAnalysisController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: '获取当前用户信息',
-    description: '通过JWT token获取当前登录用户的信息'
+    description: '通过JWT token获取当前登录用户的信息，包含已打卡的网球场数量'
   })
   @ApiResponse({
     status: 200,
@@ -134,8 +134,15 @@ export class TennisAnalysisController {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
     this.logger.log('getProfile userInfo', userInfo);
+
+    // 获取用户已打卡的网球场数量
+    const checkedInVenuesCount = await this.venueRatingService.getUserCheckedInVenuesCount(userInfo.id);
+
     return {
-      user: userInfo,
+      user: {
+        ...userInfo.toJSON(),
+        checkedInVenuesCount
+      },
       message: '用户信息获取成功'
     };
   }
@@ -174,6 +181,8 @@ export class TennisAnalysisController {
     };
   }
 
+
+
   @Post('auth/refresh-token')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -200,7 +209,7 @@ export class TennisAnalysisController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: '获取用户评分记录列表',
-    description: '分页获取当前用户的网球评分记录'
+    description: '分页获取用户的网球评分记录，支持传入指定userId查询其他用户的记录'
   })
   @ApiResponse({
     status: 200,
@@ -212,7 +221,11 @@ export class TennisAnalysisController {
     if (!userInfo) {
       throw new Error('用户不存在');
     }
-    return this.tennisScoreService.getUserScores(userInfo.id, queryDto);
+
+    // 如果传入了userId参数，使用传入的userId；否则使用当前登录用户的ID
+    const targetUserId = queryDto.userId || userInfo.id;
+
+    return this.tennisScoreService.getUserScores(targetUserId, queryDto);
   }
 
   @Get('scores/:id')

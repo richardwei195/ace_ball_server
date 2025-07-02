@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { TennisAnalysisController } from './tennis-analysis.controller';
 import { TennisVenueController } from './tennis-venue.controller';
+import { UserController } from './user.controller';
 import { TennisAnalysisService } from './tennis-analysis.service';
 import { WechatService } from './wechat.service';
 import { TennisScoreService } from './tennis-score.service';
@@ -30,7 +31,7 @@ import { TennisVenueRating } from './models/tennis-venue-rating.model';
       inject: [ConfigService],
     }),
   ],
-  controllers: [TennisAnalysisController, TennisVenueController],
+  controllers: [TennisAnalysisController, TennisVenueController, UserController],
   providers: [TennisAnalysisService, WechatService, TennisScoreService, TennisVenueService, TennisVenueRatingService, CosService, JwtAuthGuard],
   exports: [TennisAnalysisService, WechatService, TennisScoreService, TennisVenueService, TennisVenueRatingService, CosService],
 })

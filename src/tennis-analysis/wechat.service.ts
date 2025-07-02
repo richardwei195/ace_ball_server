@@ -254,6 +254,20 @@ export class WechatService {
   }
 
   /**
+   * 根据用户ID获取用户信息
+   */
+  async getUserById(userId: string): Promise<User | null> {
+    try {
+      return await this.userModel.findOne({
+        where: { id: userId },
+      });
+    } catch (error) {
+      this.logger.error(`获取用户信息失败: ${error.message}`, error.stack);
+      return null;
+    }
+  }
+
+  /**
    * 更新用户信息
    */
   async updateUserProfile(openid: string, updateData: any): Promise<User> {

@@ -288,4 +288,24 @@ export class TennisVenueRatingService {
       return new Map();
     }
   }
+
+  /**
+   * 获取用户已打卡的网球场数量
+   */
+  async getUserCheckedInVenuesCount(userId: string): Promise<number> {
+    try {
+      const count = await this.venueRatingModel.count({
+        where: {
+          userId,
+        },
+      });
+
+      this.logger.log(`用户 ${userId} 已打卡网球场数量: ${count}`);
+      return count;
+
+    } catch (error) {
+      this.logger.error(`获取用户已打卡网球场数量失败: ${error.message}`, error.stack);
+      throw new BadRequestException('获取已打卡网球场数量失败');
+    }
+  }
 } 
