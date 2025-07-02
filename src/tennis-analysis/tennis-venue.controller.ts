@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiBearerAut
 import { TennisVenueService } from './tennis-venue.service';
 import { TennisVenueRatingService } from './tennis-venue-rating.service';
 import { WechatService } from './wechat.service';
-import { QueryTennisVenueDto, TennisVenueListResponseDto, TennisVenueDto } from './dto/tennis-venue.dto';
+import { QueryTennisVenueDto, TennisVenueListResponseDto, TennisVenueDto, CreateTennisVenueDto } from './dto/tennis-venue.dto';
 import { CreateVenueRatingDto, UpdateVenueRatingDto, QueryVenueRatingDto, VenueRatingDto, VenueRatingStatsDto } from './dto/tennis-venue-rating.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { User } from './decorators/user.decorator';
@@ -220,6 +220,40 @@ export class TennisVenueController {
       return {
         code: API_CODE.SYSTEM_ERROR,
         message: error.message || '获取城市列表失败',
+        data: null,
+      };
+    }
+  }
+
+  // 场馆管理接口
+
+  @Post()
+  @ApiOperation({
+    summary: '创建网球场馆',
+    description: '录入新的网球场馆信息，可同时添加预订方式'
+  })
+  @ApiResponse({
+    status: 201,
+    description: '创建成功',
+    type: TennisVenueDto,
+  })
+  @ApiBadRequestResponse({
+    description: '创建失败',
+  })
+  async createVenue(@Body() createDto: CreateTennisVenueDto): Promise<any> {
+    try {
+      const venue = await this.tennisVenueService.createVenue(createDto);
+
+      return {
+        code: API_CODE.SUCCESS,
+        message: '创建场馆成功',
+        data: venue,
+      };
+    } catch (error) {
+      this.logger.error('createVenue error', error);
+      return {
+        code: API_CODE.SYSTEM_ERROR,
+        message: error.message || '创建场馆失败',
         data: null,
       };
     }

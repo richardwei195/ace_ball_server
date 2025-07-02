@@ -1,6 +1,6 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize, Transaction } from 'sequelize';
 import { TennisVenue } from './models/tennis-venue.model';
 import { TennisVenueBookingMethod, BookingMethodType } from './models/tennis-venue-booking-method.model';
 import {
@@ -191,24 +191,55 @@ export class TennisVenueService {
    * 创建场馆
    */
   async createVenue(createDto: CreateTennisVenueDto): Promise<TennisVenueDto> {
+    const transaction = await this.tennisVenueModel?.sequelize?.transaction();
+    
     try {
       this.logger.log(`创建场馆，数据: ${JSON.stringify(createDto)}`);
 
+      const { bookingMethods, ...venueData } = createDto;
+
       // 将时间字符串转换为分钟
-      const venueData = {
-        ...createDto,
+      const processedVenueData = {
+        ...venueData,
         openStartTime: TennisVenue.timeToMinutes(createDto.openStartTime),
         openEndTime: TennisVenue.timeToMinutes(createDto.openEndTime),
-        sortOrder: createDto.sortOrder || 0,
+        isOpen: false,
       };
 
-      const venue = await this.tennisVenueModel.create(venueData);
+      // 创建场馆
+      const venue = await this.tennisVenueModel.create(processedVenueData, { transaction });
 
-      const result = this.formatVenueResponse(venue);
+      // 如果有预订方式，则同时创建
+      if (bookingMethods && bookingMethods.length > 0) {
+        const bookingMethodsData = bookingMethods.map((method, index) => ({
+          venueId: venue.id,
+          ...method,
+          isEnabled: false,
+        }));
+
+        await this.bookingMethodModel.bulkCreate(bookingMethodsData, { transaction });
+      }
+
+      await transaction?.commit();
+
+      // 重新查询获取完整数据（包含预订方式）
+      const createdVenue = await this.tennisVenueModel.findByPk(venue.id, {
+        include: [
+          {
+            model: this.bookingMethodModel,
+            as: 'bookingMethods',
+            where: { isEnabled: true },
+            required: false,
+          }
+        ],
+      });
+
+      const result = this.formatVenueResponse(createdVenue);
       this.logger.log(`创建场馆成功，ID: ${venue.id}`);
       return result;
 
     } catch (error) {
+      await transaction?.rollback();
       this.logger.error(`创建场馆失败: ${error.message}`, error.stack);
       throw new HttpException('创建场馆失败', HttpStatus.INTERNAL_SERVER_ERROR);
     }

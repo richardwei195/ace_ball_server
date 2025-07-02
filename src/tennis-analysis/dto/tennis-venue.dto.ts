@@ -174,57 +174,6 @@ export class TennisVenueListResponseDto {
   availableCities: string[];
 }
 
-export class CreateTennisVenueDto {
-  @ApiProperty({ description: '场馆名称', example: '广州天河体育中心' })
-  @IsString()
-  name: string;
-
-  @ApiProperty({ description: '所在城市', example: '广州' })
-  @IsString()
-  city: string;
-
-  @ApiProperty({ description: '场馆地址', example: '天河区体育西路' })
-  @IsString()
-  location: string;
-
-  @ApiProperty({ description: '营业开始时间', example: '08:00' })
-  @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业开始时间格式必须为 HH:mm' })
-  openStartTime: string;
-
-  @ApiProperty({ description: '营业结束时间', example: '20:00' })
-  @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业结束时间格式必须为 HH:mm' })
-  openEndTime: string;
-
-  @ApiProperty({ description: '是否营业', example: true })
-  @IsBoolean()
-  isOpen: boolean;
-
-  @ApiProperty({ description: '价格区间', example: '¥50-120/小时' })
-  @IsString()
-  priceRange: string;
-
-  @ApiProperty({ description: '场馆特色服务', example: ['标准场地', '器材租赁', '教练服务'] })
-  @IsArray()
-  @IsString({ each: true })
-  features: string[];
-
-  @ApiProperty({ description: '场馆描述', example: '专业网球场地，设施完善', required: false })
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @ApiProperty({ description: '场馆图片URL', example: 'https://example.com/venue.jpg', required: false })
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @ApiProperty({ description: '排序权重', example: 0, required: false })
-  @IsOptional()
-  @IsNumber()
-  sortOrder?: number;
-}
 
 export class CreateBookingMethodDto {
   @ApiProperty({ description: '预订方式类型', example: 'h5' })
@@ -273,3 +222,69 @@ export class CreateBookingMethodDto {
   @IsNumber()
   sortOrder?: number;
 } 
+
+export class CreateTennisVenueDto {
+  @ApiProperty({ description: '场馆名称', example: '广州天河体育中心' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ description: '所在城市', example: '广州' })
+  @IsString()
+  city: string;
+
+  @ApiProperty({ description: '场馆地址', example: '天河区体育西路' })
+  @IsString()
+  location: string;
+
+  @ApiProperty({ description: '营业开始时间', example: '08:00' })
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业开始时间格式必须为 HH:mm' })
+  openStartTime: string;
+
+  @ApiProperty({ description: '营业结束时间', example: '20:00' })
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '营业结束时间格式必须为 HH:mm' })
+  openEndTime: string;
+
+  @ApiProperty({ description: '预订时间', example: 'T-1 10:00' })
+  @IsString()
+  bookingStartTime: string;
+
+  @ApiProperty({ description: '价格区间', example: '¥50-120/小时' })
+  @IsString()
+  priceRange: string;
+
+  @ApiProperty({ description: '场馆特色服务', example: ['标准场地', '器材租赁', '教练服务'] })
+  @IsArray()
+  @IsString({ each: true })
+  features: string[];
+
+  @ApiProperty({ description: '场馆描述', example: '专业网球场地，设施完善', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ description: '场馆图片URL', example: 'https://example.com/venue.jpg', required: false })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @ApiProperty({ 
+    description: '预订方式列表', 
+    type: [CreateBookingMethodDto],
+    required: false,
+    example: [
+      {
+        "type": "h5",
+        "name": "在线预订",
+        "icon": "internet",
+        "color": "#4facfe",
+        "url": "https://tianhe-sports.gov.cn"
+      }
+    ]
+  })
+  @IsOptional()
+  @IsArray()
+  @Type(() => CreateBookingMethodDto)
+  bookingMethods?: CreateBookingMethodDto[];
+}
