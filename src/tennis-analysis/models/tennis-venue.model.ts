@@ -28,21 +28,21 @@ export class TennisVenue extends Model {
 
   @Column({
     type: DataType.STRING(200),
-    allowNull: false,
+    allowNull: true,
     comment: '场馆地址',
   })
   declare location: string;
 
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
     comment: '营业开始时间 (以分钟为单位，从00:00开始计算，如480表示08:00)',
   })
   declare openStartTime: number;
 
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
     comment: '营业结束时间 (以分钟为单位，从00:00开始计算，如1200表示20:00)',
   })
   declare openEndTime: number;
@@ -50,7 +50,7 @@ export class TennisVenue extends Model {
   // 预订时间
   @Column({
     type: DataType.STRING(255),
-    allowNull: false,
+    allowNull: true,
     comment: '预订时间，纯文本，比如  T-1 10:00',
   })
   declare bookingStartTime: string;
@@ -66,14 +66,14 @@ export class TennisVenue extends Model {
 
   @Column({
     type: DataType.STRING(50),
-    allowNull: false,
+    allowNull: true,
     comment: '价格区间',
   })
   declare priceRange: string;
 
   @Column({
     type: DataType.JSON,
-    allowNull: false,
+    allowNull: true,
     comment: '场馆特色服务',
   })
   declare features: string[];

@@ -192,7 +192,7 @@ export class TennisVenueService {
    */
   async createVenue(createDto: CreateTennisVenueDto): Promise<TennisVenueDto> {
     const transaction = await this.tennisVenueModel?.sequelize?.transaction();
-    
+
     try {
       this.logger.log(`创建场馆，数据: ${JSON.stringify(createDto)}`);
 
@@ -201,8 +201,8 @@ export class TennisVenueService {
       // 将时间字符串转换为分钟
       const processedVenueData = {
         ...venueData,
-        openStartTime: TennisVenue.timeToMinutes(createDto.openStartTime),
-        openEndTime: TennisVenue.timeToMinutes(createDto.openEndTime),
+        openStartTime: createDto.openStartTime ? TennisVenue.timeToMinutes(createDto.openStartTime) : null,
+        openEndTime: createDto.openEndTime ? TennisVenue.timeToMinutes(createDto.openEndTime) : null,
         isOpen: false,
       };
 
