@@ -76,6 +76,7 @@ export class UserController {
         tennisExperience: userInfo.tennisExperience,
         checkedInVenuesCount,
         ntrpRating: userInfo.ntrpRating,
+        id: userInfo.id,
       };
 
       return {
